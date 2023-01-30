@@ -45,7 +45,7 @@
 ]]]
 
 
-[var __scan_package_directory [lambda [dir] [block
+[var load_and_validate_package_dir [lambda [dir] [block
     [var cwd [os.cwd]]
     [os.chdir dir]
 
@@ -67,6 +67,7 @@
     [try [set package_data.authors authors] [] ]                ; Optional field
     [try [set package_data.license license] [] ]                ; Optional field
     [try [set package_data.version version] [] ]                ; Optional field
+    [set package_data.is_valid 1]
 
     [os.chdir cwd]
     [yield package_data]
@@ -106,7 +107,7 @@
     [var resulting_package_data [list ]]
 
     [iter package packages_list [block
-        [push resulting_package_data [sys.__scan_package_directory package]]
+        [push resulting_package_data [sys.load_and_validate_package_dir package]]
     ]]
 
     [os.chdir cwd]

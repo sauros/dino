@@ -60,11 +60,53 @@
 
     [putln [os.ls "./"]]
 
-    ;
-    ;   TODO
-    ;
-    ;   - clone the repo to SAUROS_HOME/staging
-    ;   - verify that its a package
-    ;   - update `installed_packages`
-    ;
+    [if [not [os.is_file "dino.saur"]] [block
+        [exit_error "Repository does not contain a `dino.saur` file"]
+    ]]
+
+    [try
+        [block
+            [import "dino.saur"]
+
+            [if [sneq "list" [type packages]] [block
+                [exit_error "Expected `packages` variable to be of type `list`"]
+            ]]
+
+            [iter package packages [block
+                [if [sneq "string" [type package]] [block
+                    [exit_error "Expected all items in `packages` list to be of type `string`"]
+                ]]
+
+                [putln package]
+            
+                [if [not [os.is_dir package]] [block
+                    [exit_error 
+                        [fmt.join 
+                            [list "Expected listed package `" package "` to be a directory"]]]
+                ]]
+
+                [var new_package_data [sys.load_and_validate_package_dir package]]
+
+                [if [not new_package_data.is_valid] [block
+                    [exit_error 
+                        [fmt.join 
+                            [list "Given directory `" package "` is not a valid sauros package"]]]
+                ]]
+
+                [put package " seems to be a valid package. Installing ..."]
+
+                [putln "TODO: Copy the thing to ./pkgs"]
+
+                [putln "COMPLETE"]
+            ]]
+        ]
+    
+        ; Try failed
+        [block
+            [exit_error [fmt.join [list "Failed to validate `dino.saur` file: " $]]]
+        ]
+    ]
+
+
+    [putln "TODO: Reload packages"]
 ]]]
