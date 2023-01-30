@@ -1,0 +1,100 @@
+#!/usr/local/bin/sauros
+
+; Core packages
+;
+[use "std"]
+[use "fmt"]
+[use "io"]
+[use "os"]
+
+; Specialty packages
+;
+[use "sys"]
+
+[import "build.saur"]
+[import "repo.saur"]
+
+; Make sure the current system is setup
+; correctly for dino to work with
+[if [!= 1 [sys.check_fn]] [block 
+    [putln ""]
+    [putln "System configuration is not correct"]
+    [putln "Please correct the displayed errors to continue"]
+    [exit 1]
+]]
+
+; Get a list of the currently installed packages on the system
+;
+[var installed_packages [sys.build_packages]]
+
+; Ensure we have some args
+[if [not [len @args]] [block
+    [putln "No arguments given, please use `info` for assistance"]
+    [exit 0]
+]]
+
+;
+;   Display information for the user
+;
+[var info_fn [lambda [] [block
+    [putln [fmt.string [fmt.join [list
+        "info          Retrieve program information (this page)\n"
+        "git           Retrieve a dino package from a remote git repo\n"
+        "list          List all of the installed packages\n"
+        "update        Check for package updates"
+    ]]]]
+    [exit 0]
+]]]
+
+;
+;   Retrieve a package
+;
+[var git_fn [lambda [] [block
+
+    [if [== 1 [len @args]] [block
+        [putln "`git` expects a `url` parameter"]
+        [exit 1]
+    ]]
+
+    [repo::obtain [at 1 @args]]
+    [exit 0]
+]]]
+
+;
+;   Build
+;
+[var build_fn [lambda [] [block
+
+    [if [== 1 [len @args]] [block
+        [putln "`build` expects a `directory` parameter"]
+        [exit 1]
+    ]]
+    
+    [build::package [at 1 @args]]
+    [exit 0]
+]]]
+
+;
+;   List user packages
+;
+[var list_fn [lambda [] [block
+    [iter pkg installed_packages [block
+        [sys.display_package_data pkg]
+    ]]
+    [exit 0]
+]]]
+
+; Read first arg and determine what the
+; user is attempting to do
+[std.match::item [[at 0 @args]] [list
+   [std.match::pattern "info" info_fn]
+   [std.match::pattern "git" git_fn]
+   [std.match::pattern "list" list_fn]
+   [std.match::pattern "build" build_fn]
+] [lambda [] [block
+   [putln "Unknown argument: " x]
+   [putln "Use `info` for assistance"]
+   [exit 1]
+]]]
+
+[exit 0]

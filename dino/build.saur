@@ -1,0 +1,53 @@
+[use "os"]
+
+[var build::package [lambda [package] [block
+
+    [var exit_error [lambda [msg] [block
+        [putln msg]
+        [exit 1]
+    ]]]
+
+    [if [not [os.is_dir package]] [block
+        [exit_error "Given path does not exist"]
+    ]]
+
+    [var cwd [os.cwd]]
+    [os.chdir package]
+
+    [if [not [os.is_file "./pkg.saur"]] [block
+        [exit_error "Given directory is not a sauros package"]
+    ]]
+
+    [var lib]
+    [try 
+        [block
+            [import "pkg.saur"]
+            [set lib library_file]
+        ]
+        [exit_error "Unable to load `library_file` from pkg.saur: " $]
+    ]
+
+    [if [os.is_file lib] [block
+        [putln "`" lib "` already exists. Replace it?"]
+        [var choice [io.get_string "[y/N] >"]]
+        [if [or [seq "y" choice] 
+                [seq "yes" choice]]
+            [block
+                [os.delete lib]
+        ]]
+    ]]
+
+    [if [os.is_file "CMakeLists.txt"] [block
+        [os.mkdir "build"]
+        [os.chdir "build"]
+        [os.system_exec "cmake ../"]
+        [os.system_exec "make -j4"]
+        [if [not [os.copy lib package]] [block
+            [putln "Failed to copy lib file"]
+        ]]
+        [os.chdir package]
+        [os.delete_all "build"]
+    ]]
+    
+    [os.chdir cwd]
+]]]
