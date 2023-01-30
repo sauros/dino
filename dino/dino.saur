@@ -41,7 +41,7 @@
         "info          Retrieve program information (this page)\n"
         "git           Retrieve a dino package from a remote git repo\n"
         "list          List all of the installed packages\n"
-        "update        Check for package updates"
+        "build         Attempt to build a CPP pkg"
     ]]]]
     [exit 0]
 ]]]
