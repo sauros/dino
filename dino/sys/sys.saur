@@ -10,7 +10,6 @@
     [exit 1]
 ]]
 
-
 [var check_fn [lambda [] [block
     [if [!= 1 [os.is_dir sys.sauros_home]] [block
         [putln "SAUROS_HOME environment variable does not point to a system directory"]
@@ -44,7 +43,6 @@
     [yield 1]
 ]]]
 
-
 [var load_and_validate_package_dir [lambda [dir] [block
     [var cwd [os.cwd]]
     [os.chdir dir]
@@ -59,6 +57,7 @@
 
     [if [!= 1 [os.is_file "./pkg.saur"]] [block
         [putln "Suspected package directory: " dir " does not contain a pkg.saur"]
+        [os.chdir cwd]
         [yield package_data]
     ]]
 

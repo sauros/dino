@@ -11,6 +11,9 @@
 ;
 [use "sys"]
 
+[import "build.saur"]
+[import "repo.saur"]
+
 ; Make sure the current system is setup
 ; correctly for dino to work with
 [if [!= 1 [sys.check_fn]] [block 
@@ -53,20 +56,22 @@
         [exit 1]
     ]]
 
-    [import "repo.saur"]
-
     [repo::obtain [at 1 @args]]
-
     [exit 0]
 ]]]
 
 ;
-;   Update packages
+;   Build
 ;
-[var update_fn [lambda [] [block
+[var build_fn [lambda [] [block
 
-    [putln "not yet completed"]
-    [exit 1]
+    [if [== 1 [len @args]] [block
+        [putln "`build` expects a `directory` parameter"]
+        [exit 1]
+    ]]
+    
+    [build::package [at 1 @args]]
+    [exit 0]
 ]]]
 
 ;
@@ -85,7 +90,7 @@
    [std.match::pattern "info" info_fn]
    [std.match::pattern "git" git_fn]
    [std.match::pattern "list" list_fn]
-   [std.match::pattern "update" update_fn]
+   [std.match::pattern "build" build_fn]
 ] [lambda [] [block
    [putln "Unknown argument: " x]
    [putln "Use `info` for assistance"]

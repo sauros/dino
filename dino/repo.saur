@@ -33,6 +33,11 @@
     [var cwd [os.cwd]]
     [os.chdir sys.sauros_home]
 
+    [os.chdir "./pkgs"]
+    [var packages_dir [os.cwd]]
+
+    [os.chdir sys.sauros_home]
+
     [var exit_error [lambda [msg] [block
         [putln msg]
         [exit 1]
@@ -57,8 +62,7 @@
     [putln "COMPLETE"]
 
     [os.chdir repo_disc_loc]
-
-    [putln [os.ls "./"]]
+    [var repo_full_path [os.cwd]]
 
     [if [not [os.is_file "dino.saur"]] [block
         [exit_error "Repository does not contain a `dino.saur` file"]
@@ -76,8 +80,6 @@
                 [if [sneq "string" [type package]] [block
                     [exit_error "Expected all items in `packages` list to be of type `string`"]
                 ]]
-
-                [putln package]
             
                 [if [not [os.is_dir package]] [block
                     [exit_error 
@@ -95,8 +97,31 @@
 
                 [put package " seems to be a valid package. Installing ..."]
 
-                [putln "TODO: Copy the thing to ./pkgs"]
+                [os.chdir packages_dir]
 
+                [if [os.is_dir package] [block
+                    [putln "`" package "` already exists. Replace it?"]
+                    [var choice [io.get_string "[y/N] >"]]
+                    [if [or [seq "y" choice] 
+                            [seq "yes" choice]]
+                        [block
+                            [os.delete_all package]
+                    ]]
+                ]]
+
+                [os.mkdir package]
+                [os.chdir package]
+                [var dest_loc [os.cwd]]
+
+                [os.chdir repo_full_path]
+
+                [if [not [os.copy package dest_loc]] [block
+                    [exit_error [fmt.join [list "Failed to copy package to: " dest_loc]]]
+                ]]
+                [putln "COMPLETE"]
+
+                [putln "Checking if package needs to be built ..."]
+                [build::package dest_loc]
                 [putln "COMPLETE"]
             ]]
         ]
@@ -106,7 +131,4 @@
             [exit_error [fmt.join [list "Failed to validate `dino.saur` file: " $]]]
         ]
     ]
-
-
-    [putln "TODO: Reload packages"]
 ]]]
