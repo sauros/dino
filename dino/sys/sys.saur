@@ -21,9 +21,6 @@
     [os.chdir sys.sauros_home]
 
     [var check_dir [lambda [dir] [block
-
-        [putln "checking : " dir]
-
         [if [!= 1 [os.is_dir dir]] [block
             [putln dir " is not a SAUROS_HOME directory - would you like to create it?"]
             [var choice [io.get_string "[y/N] >"]]

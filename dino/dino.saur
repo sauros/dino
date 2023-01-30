@@ -48,15 +48,16 @@
 ;
 [var git_fn [lambda [] [block
 
-    [putln "git integration not yet completed"]
-    ;
-    ;   TODO
-    ;
-    ;   - clone the repo to SAUROS_HOME/staging
-    ;   - verify that its a package
-    ;   - update `installed_packages`
-    ;
-    [exit 1]
+    [if [== 1 [len @args]] [block
+        [putln "`git` expects a `url` parameter"]
+        [exit 1]
+    ]]
+
+    [import "repo.saur"]
+
+    [repo::obtain [at 1 @args]]
+
+    [exit 0]
 ]]]
 
 ;

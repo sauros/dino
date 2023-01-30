@@ -1,0 +1,70 @@
+[use "os"]
+[use "random"]
+
+[var __repo::validate_url [lambda [url] [block
+
+    [yield 1]
+]]]
+
+[var __repo::generate_disk_name [lambda [] [block
+    [yield [fmt.join [list 
+        "dino-clone-"
+        [random.alpha_string 25]
+    ]]]
+]]]
+
+[var repo::obtain [lambda [url] [block
+
+    [if [0 == [__repo::validate_url url]] [block
+        [putln "Given item is not a valid url: " url]
+        [exit 1]
+    ]]
+
+    [try
+        [block 
+            [use "git"]
+        ]
+        [block
+            [putln "Failed to load `git`: " $]
+            [exit 1]
+        ]
+    ]
+
+    [var cwd [os.cwd]]
+    [os.chdir sys.sauros_home]
+
+    [var exit_error [lambda [msg] [block
+        [putln msg]
+        [exit 1]
+    ]]]
+
+    [if [not [os.is_dir "./staging"]] [block
+        [exit_error [fmt.join [list
+            "`staging` does not exist within SAUROS_HOME"
+            " please create this directory before continuing"
+        ]]]
+    ]]
+
+    [os.chdir "./staging"]
+
+    [var repo_disc_loc [__repo::generate_disk_name]]
+
+    [put "Attempting to retrieve :" url " ... "]
+    [if [not [git.clone url repo_disc_loc]] [block
+        [putln "FAIL"]
+        [exit_error "Failed to clone target"]
+    ]] 
+    [putln "COMPLETE"]
+
+    [os.chdir repo_disc_loc]
+
+    [putln [os.ls "./"]]
+
+    ;
+    ;   TODO
+    ;
+    ;   - clone the repo to SAUROS_HOME/staging
+    ;   - verify that its a package
+    ;   - update `installed_packages`
+    ;
+]]]
