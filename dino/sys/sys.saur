@@ -20,19 +20,29 @@
     [var cwd [os.cwd]]
     [os.chdir sys.sauros_home]
 
-    [if [!= 1 [os.is_dir "./pkgs"]] [block
-        [putln "SAUROS_HOME/pkgs is not a a system directory - would you like to create it?"]
-        [var choice [io.get_string "[y/N] >"]]
-        [if [or [seq "y" choice] 
-                [seq "yes" choice]]
-            [block
-                [os.mkdir "./pkgs"]
-                [os.chdir cwd]
-                [yield 1]
+    [var check_dir [lambda [dir] [block
+
+        [putln "checking : " dir]
+
+        [if [!= 1 [os.is_dir dir]] [block
+            [putln dir " is not a SAUROS_HOME directory - would you like to create it?"]
+            [var choice [io.get_string "[y/N] >"]]
+            [if [or [seq "y" choice] 
+                    [seq "yes" choice]]
+                [block
+                    [os.mkdir dir]
+                    [os.chdir cwd]
+                    [yield 1]
+            ]]
+            [os.chdir cwd]
+            [yield 0]
         ]]
-        [os.chdir cwd]
-        [yield 0]
-    ]]
+    ]]]
+
+    [if [!= 1 [check_dir "./pkgs"]] [yield 0]]
+    [if [!= 1 [check_dir "./scripts"]] [yield 0]]
+    [if [!= 1 [check_dir "./staging"]] [yield 0]]
+
     [os.chdir cwd]
     [yield 1]
 ]]]
