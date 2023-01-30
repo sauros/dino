@@ -1,0 +1,13 @@
+
+; \brief Clone a url to a given destination
+; \param url the url to clone
+; \param path the path to place the clone into
+; \note the path must not yet exist on disk, 
+;       and this method does not yet support 
+;       credentials, so the target must be 
+;       a public access repo
+[var clone [lambda [url path] [block
+    [assert "`url` parameter must be of type string" [seq "string" [type url]]]
+    [assert "`path` parameter must be of type string" [seq "string" [type path]]]
+    [git._pkg_clone_ url path]
+]]]

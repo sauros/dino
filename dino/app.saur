@@ -1,0 +1,13 @@
+[var app_name "dino"]
+
+[var authors "bosley"]
+[var license "MIT"]
+
+[var requires [list 
+    "std"
+    "fmt"
+    "io"
+    "os"
+]]
+
+[var entry "dino.saur"]

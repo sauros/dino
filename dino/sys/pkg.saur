@@ -1,0 +1,16 @@
+[var pkg_name "sys"]
+
+[var authors "bosley"]
+[var license "MIT"]
+[var version "0.0.0"]
+
+; Optional requirements for package
+; that will trigger the search for
+; required packages upon loading
+;
+; [var requires [list "std"]]
+
+; Files to include under the current pkg
+[var source_files [list
+   "sys.saur"
+]]

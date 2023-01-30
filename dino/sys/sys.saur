@@ -1,0 +1,109 @@
+[use "os"]
+[use "io"]
+[use "fmt"]
+
+[var sauros_home [os.get_env "SAUROS_HOME"]]
+
+[if [== 0 [len [fmt.expand sauros_home]]] [block
+    [putln "Error: Environment variable `SAUROS_HOME` not set"]
+    [putln "       please define this variable to continue"]
+    [exit 1]
+]]
+
+
+[var check_fn [lambda [] [block
+    [if [!= 1 [os.is_dir sys.sauros_home]] [block
+        [putln "SAUROS_HOME environment variable does not point to a system directory"]
+        [yield 0]
+    ]]
+
+    [var cwd [os.cwd]]
+    [os.chdir sys.sauros_home]
+
+    [if [!= 1 [os.is_dir "./pkgs"]] [block
+        [putln "SAUROS_HOME/pkgs is not a a system directory - would you like to create it?"]
+        [var choice [io.get_string "[y/N] >"]]
+        [if [or [seq "y" choice] 
+                [seq "yes" choice]]
+            [block
+                [os.mkdir "./pkgs"]
+                [os.chdir cwd]
+                [yield 1]
+        ]]
+        [os.chdir cwd]
+        [yield 0]
+    ]]
+    [os.chdir cwd]
+    [yield 1]
+]]]
+
+
+[var __scan_package_directory [lambda [dir] [block
+    [var cwd [os.cwd]]
+    [os.chdir dir]
+
+    [var package_data [box [block
+        [var name [nil]]
+        [var authors [nil]]
+        [var license [nil]]
+        [var version [nil]]
+        [var is_valid 0]
+    ]]]
+
+    [putln "Scanning package ... " dir]
+
+    [if [!= 1 [os.is_file "./pkg.saur"]] [block
+        [putln "Suspected package directory: " dir " does not contain a pkg.saur"]
+        [yield package_data]
+    ]]
+
+    [import "./pkg.saur"]
+    [try [set package_data.name pkg_name] [yield package_data]] ; required, die if not present
+    [try [set package_data.authors authors] [] ]                ; Optional field
+    [try [set package_data.license license] [] ]                ; Optional field
+    [try [set package_data.version version] [] ]                ; Optional field
+
+    [os.chdir cwd]
+    [yield package_data]
+]]]
+
+[var display_package_data [lambda [pkg] [block
+    [putln "Package name: " pkg.name]
+    [putln ""]
+    [put "Author(s): "]
+    [if [is_nil pkg.authors] [putln "<not listed>"] [putln pkg.authors]]
+    [put "License: "]
+    [if [is_nil pkg.license] [putln "<not listed>"] [putln pkg.license]]
+    [put "Version: "]
+    [if [is_nil pkg.version] [putln "<not listed>"] [putln pkg.version]]
+    [putln "--------------------------------"]
+]]]
+
+[var build_packages [lambda [] [block
+    [var cwd [os.cwd]]
+    [os.chdir sys.sauros_home]
+
+    [os.chdir "./pkgs"]
+
+    [var packages_list [os.ls "./"]]
+
+    [assert "Error > Failed to retrieve package directory list" [> [len packages_list] 0]]
+
+    ; No packages
+    [if [== 1 [len [at 0 packages_list]]] [yield [list ]]]
+
+    ; Get the inner list and reverse it so './' is at the end
+    [set packages_list [rev [at 0 packages_list]]]
+
+    ; Remove './'
+    [pop packages_list]
+
+    [var resulting_package_data [list ]]
+
+    [iter package packages_list [block
+        [push resulting_package_data [sys.__scan_package_directory package]]
+    ]]
+
+    [os.chdir cwd]
+    [yield resulting_package_data]
+]]]

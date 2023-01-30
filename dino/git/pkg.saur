@@ -1,0 +1,24 @@
+[var pkg_name "git"]
+
+; Optional auhor/license fields
+;
+[var authors "bosley"]
+[var license "MIT"]
+[var version "0.0.0"]
+
+; C++ shared lib to link to
+[var library_file "git.lib"]
+[var library_functions [list
+   "_pkg_clone_"
+]]
+
+; Optional requirements for package
+; that will trigger the search for
+; required packages upon loading
+;
+; [var requires [list "std"]]
+
+; Files to include under the current pkg
+[var source_files [list
+   "git.saur"
+]]
