@@ -37,7 +37,8 @@
     [putln [fmt.string [fmt.join [list
         "info          Retrieve program information (this page)\n"
         "git           Retrieve a dino package from a remote git repo\n"
-        "list          List all of the installed packages\n"    
+        "list          List all of the installed packages\n"
+        "update        Check for package updates"
     ]]]]
     [exit 0]
 ]]]
@@ -59,6 +60,15 @@
 ]]]
 
 ;
+;   Update packages
+;
+[var update_fn [lambda [] [block
+
+    [putln "not yet completed"]
+    [exit 1]
+]]]
+
+;
 ;   List user packages
 ;
 [var list_fn [lambda [] [block
@@ -74,6 +84,7 @@
    [std.match::pattern "info" info_fn]
    [std.match::pattern "git" git_fn]
    [std.match::pattern "list" list_fn]
+   [std.match::pattern "update" update_fn]
 ] [lambda [] [block
    [putln "Unknown argument: " x]
    [putln "Use `info` for assistance"]

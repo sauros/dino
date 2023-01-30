@@ -50,8 +50,6 @@
         [var is_valid 0]
     ]]]
 
-    [putln "Scanning package ... " dir]
-
     [if [!= 1 [os.is_file "./pkg.saur"]] [block
         [putln "Suspected package directory: " dir " does not contain a pkg.saur"]
         [yield package_data]
