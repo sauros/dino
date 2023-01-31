@@ -3,6 +3,9 @@
 [use "fmt"]
 
 [var sauros_home [os.get_env "SAUROS_HOME"]]
+[var sauros_pkgs [os.path_join sauros_home "pkgs"]]
+[var sauros_staging [os.path_join sauros_home "staging"]]
+[var sauros_scripts [os.path_join sauros_home "scripts"]]
 
 [if [== 0 [len [fmt.expand sauros_home]]] [block
     [putln "Error: Environment variable `SAUROS_HOME` not set"]
@@ -83,61 +86,6 @@
     [if [is_nil pkg.version] [putln "<not listed>"] [putln pkg.version]]
     [putln "--------------------------------"]
 ]]]
-
-
-[var install_package [lambda [packages_dir, package] [block
-
-    [var exit_error [lambda [msg] [block
-        [putln msg]
-        [exit 1]
-    ]]]
-
-    [if [not [os.is_dir package]] [block
-        [exit_error 
-            [fmt.join 
-                [list "Expected listed package `" package "` to be a directory"]]]
-    ]]
-
-    [var new_package_data [sys.load_and_validate_package_dir package]]
-
-    [if [not new_package_data.is_valid] [block
-        [exit_error 
-            [fmt.join 
-                [list "Given directory `" package "` is not a valid sauros package"]]]
-    ]]
-
-    [put package " seems to be a valid package. Installing ..."]
-
-    [os.chdir packages_dir]
-
-    [if [os.is_dir package] [block
-        [putln "`" package "` already exists. Replace it?"]
-        [var choice [io.get_string "[y/N] >"]]
-        [if [or [seq "y" choice] 
-                [seq "yes" choice]]
-            [block
-                [os.delete_all package]
-        ]]
-    ]]
-
-    [os.mkdir package]
-    [os.chdir package]
-    [var dest_loc [os.cwd]]
-
-    [os.chdir repo_full_path]
-
-    [if [not [os.copy package dest_loc]] [block
-        [exit_error [fmt.join [list "Failed to copy package to: " dest_loc]]]
-    ]]
-    [putln "COMPLETE"]
-
-    [putln "Checking if package needs to be built ..."]
-    [build::package dest_loc]
-    [putln "COMPLETE"]
-
-]]]
-
-
 
 [var build_packages [lambda [] [block
     [var cwd [os.cwd]]

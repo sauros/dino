@@ -1,6 +1,8 @@
 [use "os"]
 [use "random"]
 
+[import "installer.saur"]
+
 [var __repo::validate_url [lambda [url] [block
 
     [yield 1]
@@ -71,17 +73,8 @@
     [try
         [block
             [import "dino.saur"]
-
             [if [sneq "list" [type packages]] [block
                 [exit_error "Expected `packages` variable to be of type `list`"]
-            ]]
-
-            [iter package packages [block
-                [if [sneq "string" [type package]] [block
-                    [exit_error "Expected all items in `packages` list to be of type `string`"]
-                ]]
-            
-                [sys.install_package packages_dir package]
             ]]
         ]
     
@@ -90,4 +83,19 @@
             [exit_error [fmt.join [list "Failed to validate `dino.saur` file: " $]]]
         ]
     ]
+
+    [iter package packages [block
+        [if [sneq "string" [type package]] [block
+            [exit_error "Expected all items in `packages` list to be of type `string`"]
+        ]]
+
+        [os.chdir repo_full_path]
+
+        [putln "Checking if package needs to be built ..."]
+        [build::package [os.path_join [os.cwd] package]]
+        [putln "COMPLETE"]
+    
+        [installer::install [os.path_join repo_full_path package]]
+    ]]
+    [os.chdir cwd]
 ]]]
