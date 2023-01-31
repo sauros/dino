@@ -42,6 +42,7 @@
         "git           Retrieve a dino package from a remote git repo\n"
         "list          List all of the installed packages\n"
         "build         Attempt to build a CPP pkg"
+        "install       Install a package given a directory"
     ]]]]
     [exit 0]
 ]]]
@@ -75,6 +76,21 @@
 ]]]
 
 ;
+;   Install
+;
+[var install_fn [lambda [] [block
+
+    [if [== 1 [len @args]] [block
+        [putln "`install` expects a `directory` parameter"]
+        [exit 1]
+    ]]
+
+    [sys.install_package 
+        [os.path_join sys.sauros_home "pkgs"] 
+        [at 1 @args]]
+    [exit 0]
+]]]
+;
 ;   List user packages
 ;
 [var list_fn [lambda [] [block
@@ -91,6 +107,7 @@
    [std.match::pattern "git" git_fn]
    [std.match::pattern "list" list_fn]
    [std.match::pattern "build" build_fn]
+   [std.match::pattern "install" install_fn]
 ] [lambda [] [block
    [putln "Unknown argument: " x]
    [putln "Use `info` for assistance"]
