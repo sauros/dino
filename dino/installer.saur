@@ -1,0 +1,47 @@
+[use "sys"]
+[use "fmt"]
+[use "os"]
+
+[var installer::install [lambda [package] [block
+
+    [var exit_error [lambda [msg] [block
+        [putln msg]
+        [exit 1]
+    ]]]
+
+    [if [not [os.is_dir package]] [block
+        [exit_error 
+            [fmt.join 
+                [list "Expected listed package `" package "` to be a directory"]]]
+    ]]
+
+    [var new_package_data [sys.load_and_validate_package_dir package]]
+
+    [if [not new_package_data.is_valid] [block
+        [exit_error 
+            [fmt.join 
+                [list "Given directory `" package "` is not a valid sauros package"]]]
+    ]]
+
+    [put package " seems to be a valid package. Installing ..."]
+
+    [var dest_loc [os.path_join sys.sauros_pkgs [os.path_get_filename package]]]
+
+    [if [os.is_dir dest_loc] [block
+        [putln "`" dest_loc "` already exists. Replace it?"]
+        [var choice [io.get_string "[y/N] >"]]
+        [if [or [seq "y" choice] 
+                [seq "yes" choice]]
+            [block
+                [os.delete_all dest_loc]
+        ]]
+    ]]
+    [os.mkdir dest_loc]
+    [os.chdir package]
+
+    [if [not [os.copy package dest_loc]] [block
+        [exit_error [fmt.join [list "ERROR. Failed to copy package to: " dest_loc]]]
+    ]]
+
+    [putln "COMPLETE"]
+]]]

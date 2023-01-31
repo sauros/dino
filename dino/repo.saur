@@ -1,6 +1,8 @@
 [use "os"]
 [use "random"]
 
+[import "installer.saur"]
+
 [var __repo::validate_url [lambda [url] [block
 
     [yield 1]
@@ -71,58 +73,8 @@
     [try
         [block
             [import "dino.saur"]
-
             [if [sneq "list" [type packages]] [block
                 [exit_error "Expected `packages` variable to be of type `list`"]
-            ]]
-
-            [iter package packages [block
-                [if [sneq "string" [type package]] [block
-                    [exit_error "Expected all items in `packages` list to be of type `string`"]
-                ]]
-            
-                [if [not [os.is_dir package]] [block
-                    [exit_error 
-                        [fmt.join 
-                            [list "Expected listed package `" package "` to be a directory"]]]
-                ]]
-
-                [var new_package_data [sys.load_and_validate_package_dir package]]
-
-                [if [not new_package_data.is_valid] [block
-                    [exit_error 
-                        [fmt.join 
-                            [list "Given directory `" package "` is not a valid sauros package"]]]
-                ]]
-
-                [put package " seems to be a valid package. Installing ..."]
-
-                [os.chdir packages_dir]
-
-                [if [os.is_dir package] [block
-                    [putln "`" package "` already exists. Replace it?"]
-                    [var choice [io.get_string "[y/N] >"]]
-                    [if [or [seq "y" choice] 
-                            [seq "yes" choice]]
-                        [block
-                            [os.delete_all package]
-                    ]]
-                ]]
-
-                [os.mkdir package]
-                [os.chdir package]
-                [var dest_loc [os.cwd]]
-
-                [os.chdir repo_full_path]
-
-                [if [not [os.copy package dest_loc]] [block
-                    [exit_error [fmt.join [list "Failed to copy package to: " dest_loc]]]
-                ]]
-                [putln "COMPLETE"]
-
-                [putln "Checking if package needs to be built ..."]
-                [build::package dest_loc]
-                [putln "COMPLETE"]
             ]]
         ]
     
@@ -131,4 +83,19 @@
             [exit_error [fmt.join [list "Failed to validate `dino.saur` file: " $]]]
         ]
     ]
+
+    [iter package packages [block
+        [if [sneq "string" [type package]] [block
+            [exit_error "Expected all items in `packages` list to be of type `string`"]
+        ]]
+
+        [os.chdir repo_full_path]
+
+        [putln "Checking if package needs to be built ..."]
+        [build::package [os.path_join [os.cwd] package]]
+        [putln "COMPLETE"]
+    
+        [installer::install [os.path_join repo_full_path package]]
+    ]]
+    [os.chdir cwd]
 ]]]

@@ -13,6 +13,7 @@
 
 [import "build.saur"]
 [import "repo.saur"]
+[import "installer.saur"]
 
 ; Make sure the current system is setup
 ; correctly for dino to work with
@@ -42,6 +43,7 @@
         "git           Retrieve a dino package from a remote git repo\n"
         "list          List all of the installed packages\n"
         "build         Attempt to build a CPP pkg"
+        "install       Install a package given a directory (does not build cpp packages)"
     ]]]]
     [exit 0]
 ]]]
@@ -70,10 +72,27 @@
         [exit 1]
     ]]
     
-    [build::package [at 1 @args]]
+    [var path [os.path_get_abs [at 1 @args]]]
+
+    [build::package path]
     [exit 0]
 ]]]
 
+;
+;   Install
+;
+[var install_fn [lambda [] [block
+
+    [if [== 1 [len @args]] [block
+        [putln "`install` expects a `directory` parameter"]
+        [exit 1]
+    ]]
+
+    [var path [os.path_get_abs [at 1 @args]]]
+
+    [installer::install path]
+    [exit 0]
+]]]
 ;
 ;   List user packages
 ;
@@ -91,8 +110,9 @@
    [std.match::pattern "git" git_fn]
    [std.match::pattern "list" list_fn]
    [std.match::pattern "build" build_fn]
+   [std.match::pattern "install" install_fn]
 ] [lambda [] [block
-   [putln "Unknown argument: " x]
+   [putln "Unknown argument: " [at 0 @args]]
    [putln "Use `info` for assistance"]
    [exit 1]
 ]]]

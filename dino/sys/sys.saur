@@ -3,6 +3,9 @@
 [use "fmt"]
 
 [var sauros_home [os.get_env "SAUROS_HOME"]]
+[var sauros_pkgs [os.path_join sauros_home "pkgs"]]
+[var sauros_staging [os.path_join sauros_home "staging"]]
+[var sauros_scripts [os.path_join sauros_home "scripts"]]
 
 [if [== 0 [len [fmt.expand sauros_home]]] [block
     [putln "Error: Environment variable `SAUROS_HOME` not set"]
