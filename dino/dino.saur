@@ -43,7 +43,7 @@
         "git           Retrieve a dino package from a remote git repo\n"
         "list          List all of the installed packages\n"
         "build         Attempt to build a CPP pkg"
-        "install       Install a package given a directory"
+        "install       Install a package given a directory (does not build cpp packages)"
     ]]]]
     [exit 0]
 ]]]
